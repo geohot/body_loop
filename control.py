@@ -60,14 +60,14 @@ if __name__ == "__main__":
     probs = np.exp(probs[0])
 
     # control policy, turn harder if we are more confident
-    if probs[0] > 0.96: choice = 0
-    elif probs[2] > 0.96: choice = 4
-    elif probs[1] > 0.96: choice = 2
+    if probs[0] > 0.99: choice = 0
+    elif probs[2] > 0.99: choice = 4
+    elif probs[1] > 0.99: choice = 2
     elif probs[0] > probs[2]: choice = 1
     else: choice = 3
 
     # minus y is right, plus y is left
-    y = [-0.5, -0.2, 0, 0.2, 0.5][choice]
+    y = [-0.6, -0.2, 0, 0.2, 0.6][choice]
     control(-0.35, y)
     print(f"{y:5.1f}", distance_in_course, probs)
 
