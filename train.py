@@ -21,6 +21,8 @@ train_set = [
   ("right_day_1_dcamera", 2),
   ("left_day_2_dcamera", 0),
   ("right_day_2_dcamera", 2),
+  ("left_day_3_dcamera", 0),
+  ("right_day_3_dcamera", 2),
 ]
 
 test_set = [

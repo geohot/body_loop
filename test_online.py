@@ -1,6 +1,5 @@
 import sys
-from foundation import get_foundation
-from control import get_tinynet
+from control import get_foundation, get_tinynet
 from video import frames_from_file
 from tinygrad.jit import TinyJit
 from tinygrad.tensor import Tensor

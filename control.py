@@ -6,13 +6,39 @@ from tinygrad.jit import TinyJit
 from tinygrad.tensor import Tensor
 from tinygrad.nn.state import load_state_dict, safe_load
 
+import sys
+import tinygrad
+from pathlib import Path
+
 import json
 import numpy as np
 np.set_printoptions(suppress=True)
 
-from foundation import get_foundation
 from video import live_decode_frames
 from train import TinyNet
+
+# this is the yolo foundation model
+def get_foundation():
+  # add tinygrad and tinygrad examples to python path
+  sys.path.append(str(Path(tinygrad.__path__[0]).parent))
+  sys.path.append(str(Path(tinygrad.__path__[0]).parent / "examples"))
+
+  from yolov8 import YOLOv8, get_variant_multiples
+  yolo_variant = "n"
+  depth, width, ratio = get_variant_multiples(yolo_variant)
+  yolo_infer = YOLOv8(w=width, r=ratio, d=depth, num_classes=80)
+
+  from extra.utils import download_file
+  from tinygrad.nn.state import safe_load, load_state_dict
+  weights_location = Path("/tmp") / f'yolov8{yolo_variant}.safetensors'
+  download_file(f'https://gitlab.com/r3sist/yolov8_weights/-/raw/master/yolov8{yolo_variant}.safetensors', weights_location)
+  state_dict = safe_load(weights_location)
+  load_state_dict(yolo_infer, state_dict)
+  def foundation(imgs:Tensor):
+    x = yolo_infer.net(imgs.permute(0,3,1,2).float() / 255)
+    x = yolo_infer.fpn(*x)
+    return x[2]
+  return foundation
 
 def get_tinynet():
   net = TinyNet()
