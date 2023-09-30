@@ -84,7 +84,7 @@ def get_flips(x):
 
 if __name__ == "__main__":
   #train_set += get_flips(train_set)
-  #test_set = get_flips(test_set)
+  #test_set += get_flips(test_set)
 
   train_sets = [(safe_load(f"data/{fn}.safetensors")["x"].numpy(),y) for fn,y in train_set]
   test_sets = [(safe_load(f"data/{fn}.safetensors")["x"].numpy(),y) for fn,y in test_set]
