@@ -32,13 +32,13 @@ test_set = [
 # this is the net used after the yolo foundation model
 class TinyNet:
   def __init__(self):
-    self.c1 = Conv2d(256,64,3)
-    self.c2 = Conv2d(64,4,3)
-    self.l = Linear(704,4)
+    self.c1 = Conv2d(256,8,3)
+    #self.c2 = Conv2d(64,4,3)
+    self.l = Linear(1872,4)
 
   def __call__(self, x):
     x = self.c1(x).gelu()
-    x = self.c2(x).gelu()
+    #x = self.c2(x).gelu()
     x = x.reshape(x.shape[0], -1)
     x = self.l(x)
     return x[:, 0:3].log_softmax(), x[:, 3].sigmoid()
@@ -60,8 +60,9 @@ def train_step(x,y,z):
 @TinyJit
 def test_step(tx,ty):
   out,_ = net(tx)
+  loss = out.sparse_categorical_crossentropy(ty)
   cat = out.argmax(axis=-1)
-  return (cat == ty).mean().realize()
+  return loss.realize(), (cat == ty).mean().realize()
 
 def get_minibatch(sets, bs=32):
   xs, ys, zs = [], [], []
@@ -74,6 +75,14 @@ def get_minibatch(sets, bs=32):
   return Tensor(np.concatenate(xs, axis=0)), Tensor(np.array(ys)), Tensor(np.array(zs, dtype=np.float32))
 
 if __name__ == "__main__":
+  # add the flips
+  """
+  for t,y in train_set[:]:
+    if y == 2: y = 0
+    elif y == 0: y = 2
+    train_set.append((t+"_flip", y))
+  """
+
   train_sets = [(safe_load(f"data/{fn}.safetensors")["x"].numpy(),y) for fn,y in train_set]
   test_sets = [(safe_load(f"data/{fn}.safetensors")["x"].numpy(),y) for fn,y in test_set]
 
@@ -85,18 +94,22 @@ if __name__ == "__main__":
   net = TinyNet()
   optim = Adam(get_parameters(net))
 
-  acc, tacc = [], []
-  for i in (t:=trange(1000)):
-    if i%10 == 0: test_accuracy = test_step(tx, ty)
+  acc, tacc, losses, tlosses = [], [], [], []
+  for i in (t:=trange(500)):
+    if i%10 == 0: test_loss, test_accuracy = test_step(tx, ty)
     x,y,z = get_minibatch(train_sets, 64)
     loss, loss2, accuracy = train_step(x,y,z)
+    losses.append(float(loss.numpy()))
+    tlosses.append(float(test_loss.numpy()))
     acc.append(float(accuracy.numpy()))
     tacc.append(float(test_accuracy.numpy()))
-    t.set_description("loss %.2f mse %.2f accuracy %.3f test_accuracy %.3f lr: %f" % (loss.numpy(), loss2.numpy(), accuracy.numpy(), test_accuracy.numpy(), optim.lr.numpy()))
+    t.set_description("loss %.2f mse %.2f accuracy %.3f test_accuracy %.3f test_loss %.4f lr: %f" % (loss.numpy(), loss2.numpy(), accuracy.numpy(), test_accuracy.numpy(), test_loss.numpy(), optim.lr.numpy()))
 
   safe_save(get_state_dict(net), "tinynet.safetensors")
 
   import matplotlib.pyplot as plt
+  plt.plot(losses)
+  plt.plot(tlosses)
   plt.plot(acc)
   plt.plot(tacc)
   plt.show()
