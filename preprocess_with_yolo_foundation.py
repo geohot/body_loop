@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 def preprocess(foundation, fn, fn_out, flip=False):
   print("preprocessing", fn, fn_out)
+  if os.path.isfile(fn_out): return
   frms = []
   xs = []
   for frm in tqdm(frames_from_file(fn)):
