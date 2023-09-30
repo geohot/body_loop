@@ -32,10 +32,10 @@ test_set = [
 # this is the net used after the yolo foundation model
 class TinyNet:
   def __init__(self):
-    self.c1 = Conv2d(256,8,3)
-    self.l = Linear(1872,4)
+    self.c1 = Conv2d(256,6,3)
+    self.l = Linear(1404,4)
   def __call__(self, x):
-    x = self.c1(x).gelu().dropout(0.6)
+    x = self.c1(x).gelu().dropout(0.5)
     x = x.reshape(x.shape[0], -1)
     x = self.l(x)
     return x[:, 0:3].log_softmax(), x[:, 3].sigmoid()
@@ -83,8 +83,8 @@ def get_flips(x):
   return ret
 
 if __name__ == "__main__":
-  #train_set += get_flips(train_set)
-  #test_set += get_flips(test_set)
+  train_set += get_flips(train_set)
+  test_set += get_flips(test_set)
 
   train_sets = [(safe_load(f"data/{fn}.safetensors")["x"].numpy(),y) for fn,y in train_set]
   test_sets = [(safe_load(f"data/{fn}.safetensors")["x"].numpy(),y) for fn,y in test_set]
@@ -98,7 +98,7 @@ if __name__ == "__main__":
   optim = Adam(get_parameters(net))
 
   acc, tacc, losses, tlosses = [], [], [], []
-  for i in (t:=trange(500)):
+  for i in (t:=trange(600)):
     if i%10 == 0: test_loss, test_accuracy = test_step(tx, ty)
     x,y,z = get_minibatch(train_sets, 64)
     loss, loss2, accuracy = train_step(x,y,z)
