@@ -12,6 +12,9 @@ if __name__ == "__main__":
 
   test_data = "data/straight_2_dcamera.hevc" if len(sys.argv) == 1 else sys.argv[1]
 
+  Tensor.no_grad = True
+  Tensor.training = False
+
   @TinyJit
   def pred(x):
     out = foundation(x)
