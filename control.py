@@ -10,7 +10,8 @@ import json
 import numpy as np
 np.set_printoptions(suppress=True)
 
-from helpers import get_foundation, live_decode_frames
+from foundation import get_foundation
+from video import live_decode_frames
 from train import TinyNet
 
 def get_tinynet():

@@ -8,33 +8,25 @@ from tqdm import trange
 from tinygrad.jit import TinyJit
 import numpy as np
 
+# TODO: programmatic flip adding
 train_set = [
   ("left_1_dcamera", 0),
   ("left_3_dcamera", 0),
-  ("left_1_dcamera_flip", 2),
-  ("left_3_dcamera_flip", 2),
   ("right_1_dcamera", 2),
   ("right_3_dcamera", 2),
-  ("right_1_dcamera_flip", 0),
-  ("right_3_dcamera_flip", 0),
   ("straight_1_dcamera", 1),
-  ("straight_1_dcamera_flip", 1),
   ("ljust_1_dcamera", 0),
   ("rjust_1_dcamera", 2),
-  ("ljust_1_dcamera_flip", 2),
-  ("rjust_1_dcamera_flip", 0),
   ("left_day_1_dcamera", 0),
   ("right_day_1_dcamera", 2),
-  ("left_day_1_dcamera_flip", 2),
-  ("right_day_1_dcamera_flip", 0),
+  ("left_day_2_dcamera", 0),
+  ("right_day_2_dcamera", 2),
 ]
+
 test_set = [
   ("left_2_dcamera", 0),
   ("right_2_dcamera", 2),
   ("straight_2_dcamera", 1),
-  ("left_2_dcamera_flip", 2),
-  ("right_2_dcamera_flip", 0),
-  ("straight_2_dcamera_flip", 1),
 ]
 
 # this is the net used after the yolo foundation model
@@ -103,3 +95,8 @@ if __name__ == "__main__":
     t.set_description("loss %.2f mse %.2f accuracy %.3f test_accuracy %.3f lr: %f" % (loss.numpy(), loss2.numpy(), accuracy.numpy(), test_accuracy.numpy(), optim.lr.numpy()))
 
   safe_save(get_state_dict(net), "tinynet.safetensors")
+
+  import matplotlib.pyplot as plt
+  plt.plot(acc)
+  plt.plot(tacc)
+  plt.show()
