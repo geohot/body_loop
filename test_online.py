@@ -34,4 +34,5 @@ if __name__ == "__main__":
   plt.plot(dist)
   plt.subplot(212)
   plt.plot(all_probs)
+  plt.legend(["left", "straight", "right"])
   plt.show()
