@@ -1,6 +1,5 @@
 import cereal.messaging as messaging
 from openpilot.common.realtime import Ratekeeper
-from openpilot.common.window import Window
 
 from tinygrad.jit import TinyJit
 from tinygrad.tensor import Tensor
@@ -70,6 +69,7 @@ if __name__ == "__main__":
   Tensor.training = False
   seen_iframe = False
 
+  from openpilot.common.window import Window
   win = Window(640, 480)
 
   rk = Ratekeeper(5)
