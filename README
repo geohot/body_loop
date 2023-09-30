@@ -9,3 +9,15 @@ straight_[12] are facing straight
 ljust_1 is hugging the left wall
 rjust_1 is hugging the right wall
 
+
+Programs
+===
+
+# First, process the data:
+python3 preprocess_with_yolo_foundation.py
+
+# Then, train the model (tinynet.safetensors):
+python3 train.py
+
+# Now, control the body
+python3 control.py
