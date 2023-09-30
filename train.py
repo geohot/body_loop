@@ -37,14 +37,16 @@ class TinyNet:
     self.l = Linear(1872,4)
 
   def __call__(self, x):
-    x = self.c1(x).gelu()
+    x = self.c1(x).gelu().dropout(0.8)
     #x = self.c2(x).gelu()
     x = x.reshape(x.shape[0], -1)
     x = self.l(x)
     return x[:, 0:3].log_softmax(), x[:, 3].sigmoid()
 
-@TinyJit
+# TODO: fix dropout in the JIT
+#@TinyJit
 def train_step(x,y,z):
+  Tensor.training = True
   optim.lr *= 0.999
   out,dist = net(x)
   loss = out.sparse_categorical_crossentropy(y)
@@ -59,6 +61,7 @@ def train_step(x,y,z):
 
 @TinyJit
 def test_step(tx,ty):
+  Tensor.training = False
   out,_ = net(tx)
   loss = out.sparse_categorical_crossentropy(ty)
   cat = out.argmax(axis=-1)
@@ -74,14 +77,17 @@ def get_minibatch(sets, bs=32):
     zs.append(sel/src.shape[0])
   return Tensor(np.concatenate(xs, axis=0)), Tensor(np.array(ys)), Tensor(np.array(zs, dtype=np.float32))
 
-if __name__ == "__main__":
-  # add the flips
-  """
-  for t,y in train_set[:]:
+def get_flips(x):
+  ret = []
+  for t,y in x:
     if y == 2: y = 0
     elif y == 0: y = 2
-    train_set.append((t+"_flip", y))
-  """
+    ret.append((t+"_flip", y))
+  return ret
+
+if __name__ == "__main__":
+  #train_set += get_flips(train_set)
+  #test_set += get_flips(test_set)
 
   train_sets = [(safe_load(f"data/{fn}.safetensors")["x"].numpy(),y) for fn,y in train_set]
   test_sets = [(safe_load(f"data/{fn}.safetensors")["x"].numpy(),y) for fn,y in test_set]

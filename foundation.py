@@ -37,6 +37,7 @@ def get_foundation():
 
 def preprocess(foundation, fn, fn_out, flip=False):
   if not fn.endswith(".hevc"): return
+  if 'online' in fn: return
   print("preprocessing", fn, fn_out)
   if os.path.isfile(fn_out): return
   frms = []
