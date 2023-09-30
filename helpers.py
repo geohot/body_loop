@@ -3,8 +3,6 @@ import av
 import tinygrad
 from tinygrad.tensor import Tensor
 from pathlib import Path
-import numpy as np
-from tinygrad.nn import Conv2d, Linear
 
 # this is the yolo foundation model
 def get_foundation():
@@ -28,7 +26,6 @@ def get_foundation():
     x = yolo_infer.fpn(*x)
     return x[2]
   return foundation
-
 
 # pass in msgs to decode them to frames
 codec = None
