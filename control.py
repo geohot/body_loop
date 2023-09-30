@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     # minus y is right, plus y is left
     y = [-0.5, -0.2, 0, 0.2, 0.5][choice]
-    #control(-0.35, y)
+    control(-0.35, y)
     print(f"{y:5.1f}", distance_in_course, probs)
 
     # draw frame and run at 5hz
