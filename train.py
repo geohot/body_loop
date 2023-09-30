@@ -23,12 +23,14 @@ train_set = [
   ("right_day_2_dcamera", 2),
   ("left_day_3_dcamera", 0),
   ("right_day_3_dcamera", 2),
+  ("left_day_4_dcamera", 0),
+  ("right_day_4_dcamera", 2),
 ]
 
 test_set = [
   ("left_2_dcamera", 0),
-  ("right_2_dcamera", 2),
   ("straight_2_dcamera", 1),
+  ("right_2_dcamera", 2),
 ]
 
 # this is the net used after the yolo foundation model
