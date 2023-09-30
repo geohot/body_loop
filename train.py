@@ -11,16 +11,26 @@ import numpy as np
 train_set = [
   ("left_1_dcamera", 0),
   ("left_3_dcamera", 0),
+  ("left_1_dcamera_flip", 2),
+  ("left_3_dcamera_flip", 2),
   ("right_1_dcamera", 2),
   ("right_3_dcamera", 2),
+  ("right_1_dcamera_flip", 0),
+  ("right_3_dcamera_flip", 0),
   ("straight_1_dcamera", 1),
+  ("straight_1_dcamera_flip", 1),
   ("ljust_1_dcamera", 0),
-  ("rjust_1_dcamera", 2)
+  ("rjust_1_dcamera", 2),
+  ("ljust_1_dcamera_flip", 2),
+  ("rjust_1_dcamera_flip", 0)
 ]
 test_set = [
   ("left_2_dcamera", 0),
   ("right_2_dcamera", 2),
-  ("straight_2_dcamera", 1)
+  ("straight_2_dcamera", 1),
+  ("left_2_dcamera_flip", 2),
+  ("right_2_dcamera_flip", 0),
+  ("straight_2_dcamera_flip", 1)
 ]
 
 # this is the net used after the yolo foundation model
@@ -80,7 +90,7 @@ if __name__ == "__main__":
   optim = Adam(get_parameters(net))
 
   acc, tacc = [], []
-  for i in (t:=trange(500)):
+  for i in (t:=trange(1000)):
     if i%10 == 0: test_accuracy = test_step(tx, ty)
     x,y,z = get_minibatch(train_sets, 64)
     loss, loss2, accuracy = train_step(x,y,z)

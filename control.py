@@ -4,6 +4,8 @@ from openpilot.common.window import Window
 
 from tinygrad.jit import TinyJit
 from tinygrad.tensor import Tensor
+from tinygrad.nn.state import load_state_dict, safe_load
+
 import json
 import numpy as np
 np.set_printoptions(suppress=True)
@@ -13,10 +15,8 @@ from train import TinyNet
 
 def get_tinynet():
   net = TinyNet()
-  from tinygrad.nn.state import load_state_dict, safe_load
   load_state_dict(net, safe_load("tinynet.safetensors"))
   return net
-
 
 if __name__ == "__main__":
   messaging.context = messaging.Context()
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     frms, seen_iframe = live_decode_frames(frm, seen_iframe)
     if not frms: continue
 
-    #
+    # run the model
     out = pred(Tensor(frms[-1].reshape(1, 480, 640, 3)))
     probs, distance_in_course = [x.numpy() for x in out]
     probs = np.exp(probs[0])
@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     # minus y is right, plus y is left
     y = [-0.5, -0.2, 0, 0.2, 0.5][choice]
-    control(-0.35, y)
+    #control(-0.35, y)
     print(f"{y:5.1f}", distance_in_course, probs)
 
     # draw frame and run at 5hz
