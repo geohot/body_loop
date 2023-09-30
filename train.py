@@ -32,10 +32,12 @@ test_set = [
 # this is the net used after the yolo foundation model
 class TinyNet:
   def __init__(self):
-    self.c1 = Conv2d(256,8,3)
-    self.l = Linear(1872,4)
+    self.c1 = Conv2d(256,64,3)
+    self.c2 = Conv2d(64,8,3)
+    self.l = Linear(1408,4)
   def __call__(self, x):
-    x = self.c1(x).gelu().dropout(0.85)
+    x = self.c1(x).gelu()
+    x = self.c2(x).gelu().dropout(0.85)
     x = x.reshape(x.shape[0], -1)
     x = self.l(x)
     return x[:, 0:3].log_softmax(), x[:, 3].sigmoid()
