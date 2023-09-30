@@ -1,0 +1,11 @@
+Dataset
+===
+
+We collected a dataset of carrying the body through the loop.
+
+left_[123] are facing left
+right_[123] are facing right
+straight_[12] are facing straight
+ljust_1 is hugging the left wall
+rjust_1 is hugging the right wall
+
