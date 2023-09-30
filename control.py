@@ -67,9 +67,10 @@ if __name__ == "__main__":
     else: choice = 3
 
     # minus y is right, plus y is left
+    x = -0.3 - (probs[1]*0.3)
     y = [-0.6, -0.2, 0, 0.2, 0.6][choice]
-    control(-0.35, y)
-    print(f"{y:5.1f}", distance_in_course, probs)
+    control(x, y)
+    print(f"{x:5.2f} {y:5.2f}", distance_in_course, probs)
 
     # draw frame and run at 5hz
     win.draw(frms[-1])
