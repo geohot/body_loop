@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, time, json
+import os, sys, time, json
 from pathlib import Path
 import numpy as np
 np.set_printoptions(suppress=True)
@@ -18,6 +18,8 @@ from openpilot.system.hardware import PC
 
 # device gets images not through the compressor
 if not PC:
+  os.environ["IMAGE"] = "2"
+  os.environ["FLOAT16"] = "1"
   import cv2
   from cereal.visionipc import VisionIpcClient, VisionStreamType
 
