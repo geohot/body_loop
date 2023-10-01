@@ -5,6 +5,8 @@ Can drive the body in the comma office in loops.
 
 It uses a YOLOv8 foundational model to preprocess the images, then a policy model to determine left, right, or straight. The policy model is currently trained with hand labelled data (included), but can be extended with RL.
 
+Preprocessing, training, and inference (both on PC and device) are all done with [tinygrad](https://github.com/tinygrad/tinygrad).
+
 Dataset
 ------
 
@@ -28,8 +30,17 @@ Training the model
 Running
 ------
 
-You can either run on PC remotely controlling a body, or on a 3X.
+You can either run on PC remotely controlling a body, or on a [comma 3X](https://comma.ai/shop/comma-3x).
 
 ```bash
 ./control.py
 ```
+
+Dependencies
+------
+
+A few standard Python deps. `opencv-python` is only needed on device.
+
+`pip install av tqdm opencv-python`
+
+You need a recent version of tinygrad for everything. openpilot for the controls stuff, and cv2 on device for color transform and resizing (TODO: replace with tinygrad!)
