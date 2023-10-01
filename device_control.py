@@ -59,9 +59,6 @@ if __name__ == "__main__":
     probs, distance_in_course = [x.numpy() for x in out]
     probs = np.exp(probs[0])
 
-    probs, distance_in_course = [x.numpy() for x in out]
-    probs = np.exp(probs[0])
-
     # control policy, turn harder if we are more confident
     if probs[0] > 0.99: choice = 0
     elif probs[2] > 0.99: choice = 4
