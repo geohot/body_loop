@@ -39,6 +39,9 @@ train_set = [
   ("reverse_1_dcamera", 3),
   ("reverse_2_dcamera", 3),
   ("reverse_3_dcamera", 3),
+  ("messup_right_3_dcamera", 2),
+  ("messup_right_4_dcamera", 2),
+  ("messup_right_5_dcamera", 2),
 ]
 
 test_set = [
