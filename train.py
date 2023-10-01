@@ -48,7 +48,6 @@ train_set = [
   ("messup_reverse_1_dcamera", 3),
   ("messup_reverse_2_dcamera", 3),
   ("messup_reverse_3_dcamera", 3),
-  ("messup_reverse_4_dcamera", 3),
   ("messup_straight_1_dcamera", 1),
 ]
 
