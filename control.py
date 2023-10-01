@@ -4,13 +4,6 @@ from pathlib import Path
 import numpy as np
 np.set_printoptions(suppress=True)
 
-# tinygrad!
-import tinygrad
-from tinygrad.jit import TinyJit
-from tinygrad.tensor import Tensor
-from tinygrad.nn.state import load_state_dict, safe_load
-from tinygrad.helpers import Timing, dtypes
-
 # openpilot imports
 import cereal.messaging as messaging
 from openpilot.common.realtime import Ratekeeper
@@ -22,6 +15,13 @@ if not PC:
   os.environ["FLOAT16"] = "1"
   import cv2
   from cereal.visionipc import VisionIpcClient, VisionStreamType
+
+# tinygrad!
+import tinygrad
+from tinygrad.jit import TinyJit
+from tinygrad.tensor import Tensor
+from tinygrad.nn.state import load_state_dict, safe_load
+from tinygrad.helpers import Timing, dtypes
 
 # repo local imports
 from video import live_decode_frames
