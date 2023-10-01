@@ -3,7 +3,7 @@ comma body loop driver
 
 Can drive the body in the comma office in loops.
 
-It uses a YOLOv8 foundational model to preprocess the images, then a policy model to determine left, right, or straight. The policy model is currently trained with hand labelled data (included), but can be extended with RL.
+It uses a YOLOv8 foundation model to preprocess the images, then a policy model to determine left, right, or straight. The policy model is currently trained with hand labelled data (included), but can be extended with RL.
 
 Preprocessing, training, and inference (both on PC and device) are all done with [tinygrad](https://github.com/tinygrad/tinygrad).
 
