@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 from tinygrad.tensor import Tensor
 from tinygrad.nn.state import safe_save

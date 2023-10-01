@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 os.environ["IMAGE"] = "2"
 os.environ["FLOAT16"] = "1"

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import random
 from tinygrad.nn.state import safe_load
 from tinygrad.tensor import Tensor
@@ -32,6 +33,10 @@ train_set = [
   ("extra_straight_2_dcamera", 1),
   ("extra_left_3_dcamera", 0),
   ("extra_right_3_dcamera", 2),
+  ("messup_left_1_dcamera", 0),
+  ("messup_right_1_dcamera", 2),
+  ("messup_left_2_dcamera", 0),
+  ("messup_right_2_dcamera", 2),
 ]
 
 test_set = [
