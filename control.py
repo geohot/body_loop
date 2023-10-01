@@ -1,19 +1,26 @@
 #!/usr/bin/env python3
-import cereal.messaging as messaging
-from openpilot.common.realtime import Ratekeeper
+import sys, time, json
+from pathlib import Path
+import numpy as np
+np.set_printoptions(suppress=True)
 
+# tinygrad!
+import tinygrad
 from tinygrad.jit import TinyJit
 from tinygrad.tensor import Tensor
 from tinygrad.nn.state import load_state_dict, safe_load
 
-import sys
-import tinygrad
-from pathlib import Path
+# openpilot imports
+import cereal.messaging as messaging
+from openpilot.common.realtime import Ratekeeper
+from openpilot.system.hardware import PC
 
-import json
-import numpy as np
-np.set_printoptions(suppress=True)
+# device gets images not through the compressor
+if not PC:
+  import cv2
+  from cereal.visionipc import VisionIpcClient, VisionStreamType
 
+# repo local imports
 from video import live_decode_frames
 from train import TinyNet
 
@@ -46,44 +53,59 @@ def get_tinynet():
   return net
 
 if __name__ == "__main__":
-  messaging.context = messaging.Context()
-
-  # TODO: run bridge on device back to your ip
+  # controlling the body
+  # REQUIRED on PC: run bridge on device back to YOUR ip
+  # /data/openpilot/cereal/messaging/bridge 192.168.60.251 customReservedRawData1
   pm = messaging.PubMaster(['customReservedRawData1'])
-  def control(x,y):
+  def control(x, y):
     dat = messaging.new_message()
     dat.customReservedRawData1 = json.dumps({'x': x, 'y': y}).encode()
     pm.send('customReservedRawData1', dat)
+  print("pm connected")
 
-  # TODO: replace with your ip
-  socks = {x:messaging.sub_sock(x, None, addr="192.168.63.69", conflate=False) for x in ["driverEncodeData"]}
+  # getting frames
+  if PC:
+    # TODO: replace with DEVICE ip
+    dcamData = messaging.sub_sock("driverEncodeData", None, addr="192.168.63.69", conflate=False)
+  else:
+    vipc_client = VisionIpcClient("camerad", VisionStreamType.VISION_STREAM_DRIVER, True)
+    while not vipc_client.connect(False): time.sleep(0.1)
+  print("vipc connected")
 
   # net runner
+  Tensor.no_grad = True
+  Tensor.training = False
   foundation = get_foundation()
   net = get_tinynet()
   @TinyJit
   def pred(x):
-    out = foundation(x)
-    return [x.realize() for x in net(out)]
+    return net(foundation(x)).exp()[0].realize()
 
-  Tensor.no_grad = True
-  Tensor.training = False
-  seen_iframe = False
+  if PC:
+    seen_iframe = False
+    from openpilot.common.window import Window
+    win = Window(640, 480)
 
-  from openpilot.common.window import Window
-  win = Window(640, 480)
-
+  # run at max 5hz
   rk = Ratekeeper(5)
   while 1:
-    # get frames
-    frm = messaging.drain_sock(socks["driverEncodeData"], wait_for_one=True)
-    if not seen_iframe: frm = frm[-20:]
-    frms, seen_iframe = live_decode_frames(frm, seen_iframe)
-    if not frms: continue
+    # get frame
+    if PC:
+      frm = messaging.drain_sock(dcamData, wait_for_one=True)
+      if not seen_iframe: frm = frm[-20:]
+      frms, seen_iframe = live_decode_frames(frm, seen_iframe)
+      if not frms: continue
+      img = frms[-1]
+    else:
+      yuv_img_raw = vipc_client.recv()
+      if yuv_img_raw is None or not yuv_img_raw.data.any(): continue
+      imgff = yuv_img_raw.data.reshape(-1, vipc_client.stride)
+      imgff = imgff[8:8+vipc_client.height * 3 // 2, :vipc_client.width]
+      img = cv2.cvtColor(imgff, cv2.COLOR_YUV2RGB_NV12)
+      img = cv2.resize(img, (640, 480))
 
     # run the model
-    probs = pred(Tensor(frms[-1].reshape(1, 480, 640, 3))).numpy()
-    probs = np.exp(probs[0])
+    probs = pred(Tensor(img).reshape(1, 480, 640, 3)).numpy()
 
     # control policy, turn harder if we are more confident
     if probs[0] > 0.99: choice = 0
@@ -93,11 +115,11 @@ if __name__ == "__main__":
     else: choice = 3
 
     # minus y is right, plus y is left
-    x = -0.3 - (probs[1]*0.3)
-    y = [-0.6, -0.2, 0, 0.2, 0.6][choice]
+    x = -0.5 - (probs[1]*0.5)
+    y = [-0.7, -0.2, 0, 0.2, 0.7][choice]
     control(x, y)
-    print(f"{x:5.2f} {y:5.2f}", distance_in_course, probs)
+    print(f"{x:5.2f} {y:5.2f}", probs)
 
     # draw frame and run at 5hz
-    win.draw(frms[-1])
+    if PC: win.draw(frms[-1])
     rk.keep_time()
