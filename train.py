@@ -4,7 +4,7 @@ from tinygrad.nn.state import safe_load
 from tinygrad.tensor import Tensor
 from tinygrad.nn import Conv2d, Linear
 from tinygrad.nn.state import get_parameters, get_state_dict, safe_save
-from tinygrad.nn.optim import Adam
+from tinygrad.nn.optim import AdamW
 from tqdm import trange
 from tinygrad.jit import TinyJit
 import numpy as np
@@ -123,7 +123,7 @@ if __name__ == "__main__":
   Tensor.no_grad = False
   Tensor.training = True
   net = TinyNet()
-  optim = Adam(get_parameters(net))
+  optim = AdamW(get_parameters(net))
 
   acc, tacc, losses, tlosses = [], [], [], []
   for i in (t:=trange(600)):
