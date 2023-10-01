@@ -9,6 +9,7 @@ import tinygrad
 from tinygrad.jit import TinyJit
 from tinygrad.tensor import Tensor
 from tinygrad.nn.state import load_state_dict, safe_load
+from tinygrad.helpers import Timing, dtypes
 
 # openpilot imports
 import cereal.messaging as messaging
@@ -84,6 +85,11 @@ if __name__ == "__main__":
   @TinyJit
   def pred(x):
     return net(foundation(x)).exp()[0].realize()
+
+  # warm up the net runner
+  with Timing("building 1: "): pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8))
+  with Timing("building 2: "): pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8))
+  with Timing("testing rt: "): pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8)).numpy()
 
   if PC:
     seen_iframe = False
