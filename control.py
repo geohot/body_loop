@@ -132,7 +132,7 @@ if __name__ == "__main__":
     else: choice = 3
 
     # go mostly straight, go faster if confident, maybe even go reverse
-    x = -0.5 - (probs[1]*0.5) + probs[3]
+    x = -0.5 - (probs[1]*0.5) + (probs[3]*1.5)
     # minus y is right, plus y is left
     y = [-0.7, -0.2, 0, 0.2, 0.7][choice]
     if not getenv("NODRIVE"): control(x, y)
