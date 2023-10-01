@@ -1,7 +1,9 @@
 import os
 os.environ["IMAGE"] = "2"
+os.environ["FLOAT16"] = "1"
 import sys
 import json
+import time
 sys.path.append("/data/openpilot/tinygrad_repo/examples")
 sys.path.append("/data/openpilot/tinygrad_repo")
 from tinygrad.jit import TinyJit
