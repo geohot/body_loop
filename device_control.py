@@ -60,6 +60,6 @@ if __name__ == "__main__":
 
     # minus y is right, plus y is left
     x = -0.5 - (probs[1]*0.5)
-    y = [-0.8, -0.2, 0, 0.2, 0.8][choice]
+    y = [-0.7, -0.2, 0, 0.2, 0.7][choice]
     control(x, y)
     print(f"{x:5.2f} {y:5.2f}", probs)
