@@ -33,17 +33,11 @@ if __name__ == "__main__":
   net = get_tinynet()
   @TinyJit
   def pred(x):
-    out = foundation(x)
-    return [x.realize() for x in net(out)]
-  with Timing("building 1: "):
-    pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8))
-  with Timing("building 2: "):
-    pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8))
+    return net(foundation(x)).exp()[0].realize()
 
-  for i in range(3):
-    with Timing():
-      out = pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8))
-      probs, distance_in_course = [x.numpy() for x in out]
+  with Timing("building 1: "): pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8))
+  with Timing("building 2: "): pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8))
+  with Timing("testing: "): pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8)).numpy()
 
   while 1:
     # get frame
@@ -55,9 +49,7 @@ if __name__ == "__main__":
     img = cv2.resize(img, (640, 480))
 
     # run the model
-    out = pred(Tensor(img).reshape(1, 480, 640, 3))
-    probs, distance_in_course = [x.numpy() for x in out]
-    probs = np.exp(probs[0])
+    probs = pred(Tensor(img).reshape(1, 480, 640, 3)).numpy()
 
     # control policy, turn harder if we are more confident
     if probs[0] > 0.99: choice = 0
@@ -67,7 +59,7 @@ if __name__ == "__main__":
     else: choice = 3
 
     # minus y is right, plus y is left
-    x = -0.3 - (probs[1]*0.3)
+    x = -0.6 - (probs[1]*0.4)
     y = [-0.6, -0.2, 0, 0.2, 0.6][choice]
     control(x, y)
-    print(f"{x:5.2f} {y:5.2f}", distance_in_course, probs)
+    print(f"{x:5.2f} {y:5.2f}", probs)

@@ -35,5 +35,5 @@ if __name__ == "__main__":
   foundation = get_foundation()
   for fn in os.listdir("data"):
     preprocess(foundation, "data/"+fn, "data/"+fn.replace(".hevc", ".safetensors"))
-    #preprocess(foundation, "data/"+fn, "data/"+fn.replace(".hevc", "_flip.safetensors"), True)
+    preprocess(foundation, "data/"+fn, "data/"+fn.replace(".hevc", "_flip.safetensors"), True)
 

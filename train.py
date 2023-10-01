@@ -25,6 +25,8 @@ train_set = [
   ("right_day_3_dcamera", 2),
   ("left_day_4_dcamera", 0),
   ("right_day_4_dcamera", 2),
+  ("extra_left_1_dcamera", 0),
+  ("extra_right_1_dcamera", 2),
 ]
 
 test_set = [
@@ -38,34 +40,32 @@ class TinyNet:
   def __init__(self):
     self.c1 = Conv2d(256,64,3)
     self.c2 = Conv2d(64,8,3)
-    self.l = Linear(1408,4)
+    self.l = Linear(1408,3)
   def __call__(self, x):
     x = self.c1(x).gelu()
     x = self.c2(x).gelu().dropout(0.85)
     x = x.reshape(x.shape[0], -1)
     x = self.l(x)
-    return x[:, 0:3].log_softmax(), x[:, 3].sigmoid()
+    return x.log_softmax()
 
 # TODO: fix dropout in the JIT
 #@TinyJit
 def train_step(x,y,z):
   Tensor.training = True
   optim.lr *= 0.999
-  out,dist = net(x)
+  out = net(x)
   loss = out.sparse_categorical_crossentropy(y)
-  loss2 = (z-dist).square().mean()
-  real_loss = loss+loss2
   optim.zero_grad()
-  real_loss.backward()
+  loss.backward()
   optim.step()
   cat = out.argmax(axis=-1)
   accuracy = (cat == y).mean()
-  return loss.realize(), loss2.realize(), accuracy.realize()
+  return loss.realize(), accuracy.realize()
 
 @TinyJit
 def test_step(tx,ty):
   Tensor.training = False
-  out,_ = net(tx)
+  out = net(tx)
   loss = out.sparse_categorical_crossentropy(ty)
   cat = out.argmax(axis=-1)
   return loss.realize(), (cat == ty).mean().realize()
@@ -89,8 +89,8 @@ def get_flips(x):
   return ret
 
 if __name__ == "__main__":
-  #train_set += get_flips(train_set)
-  #test_set += get_flips(test_set)
+  train_set += get_flips(train_set)
+  test_set += get_flips(test_set)
 
   train_sets = [(safe_load(f"data/{fn}.safetensors")["x"].numpy(),y) for fn,y in train_set]
   test_sets = [(safe_load(f"data/{fn}.safetensors")["x"].numpy(),y) for fn,y in test_set]
@@ -107,12 +107,12 @@ if __name__ == "__main__":
   for i in (t:=trange(600)):
     if i%10 == 0: test_loss, test_accuracy = test_step(tx, ty)
     x,y,z = get_minibatch(train_sets, 64)
-    loss, loss2, accuracy = train_step(x,y,z)
+    loss, accuracy = train_step(x,y,z)
     losses.append(float(loss.numpy()))
     tlosses.append(float(test_loss.numpy()))
     acc.append(float(accuracy.numpy()))
     tacc.append(float(test_accuracy.numpy()))
-    t.set_description("loss %.2f mse %.2f accuracy %.3f test_accuracy %.3f test_loss %.4f lr: %f" % (loss.numpy(), loss2.numpy(), accuracy.numpy(), test_accuracy.numpy(), test_loss.numpy(), optim.lr.numpy()))
+    t.set_description("loss %.2f accuracy %.3f test_accuracy %.3f test_loss %.4f lr: %f" % (loss.numpy(), accuracy.numpy(), test_accuracy.numpy(), test_loss.numpy(), optim.lr.numpy()))
 
   safe_save(get_state_dict(net), "tinynet.safetensors")
 

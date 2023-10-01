@@ -81,8 +81,7 @@ if __name__ == "__main__":
     if not frms: continue
 
     # run the model
-    out = pred(Tensor(frms[-1].reshape(1, 480, 640, 3)))
-    probs, distance_in_course = [x.numpy() for x in out]
+    probs = pred(Tensor(frms[-1].reshape(1, 480, 640, 3))).numpy()
     probs = np.exp(probs[0])
 
     # control policy, turn harder if we are more confident
