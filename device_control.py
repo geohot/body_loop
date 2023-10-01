@@ -59,7 +59,7 @@ if __name__ == "__main__":
     else: choice = 3
 
     # minus y is right, plus y is left
-    x = -0.6 - (probs[1]*0.4)
-    y = [-0.6, -0.2, 0, 0.2, 0.6][choice]
+    x = -0.5 - (probs[1]*0.5)
+    y = [-0.8, -0.2, 0, 0.2, 0.8][choice]
     control(x, y)
     print(f"{x:5.2f} {y:5.2f}", probs)
