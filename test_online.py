@@ -19,5 +19,5 @@ if __name__ == "__main__":
   import matplotlib.pyplot as plt
   plt.figure(figsize=(16,16))
   plt.plot(all_probs)
-  plt.legend(["left", "straight", "right"])
+  plt.legend(["left", "straight", "right", "reverse"])
   plt.show()

@@ -36,6 +36,9 @@ train_set = [
   ("messup_right_1_dcamera", 2),
   ("messup_left_2_dcamera", 0),
   ("messup_right_2_dcamera", 2),
+  ("reverse_1_dcamera", 3),
+  ("reverse_2_dcamera", 3),
+  ("reverse_3_dcamera", 3),
 ]
 
 test_set = [
@@ -49,7 +52,7 @@ class TinyNet:
   def __init__(self):
     self.c1 = Conv2d(256,64,3)
     self.c2 = Conv2d(64,8,3)
-    self.l = Linear(1408,3)
+    self.l = Linear(1408,4)
   def __call__(self, x):
     x = self.c1(x).gelu()
     x = self.c2(x).gelu().dropout(0.85)

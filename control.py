@@ -21,7 +21,7 @@ import tinygrad
 from tinygrad.jit import TinyJit
 from tinygrad.tensor import Tensor
 from tinygrad.nn.state import load_state_dict, safe_load
-from tinygrad.helpers import Timing, dtypes
+from tinygrad.helpers import Timing, dtypes, getenv
 
 # repo local imports
 from video import live_decode_frames
@@ -131,10 +131,11 @@ if __name__ == "__main__":
     elif probs[0] > probs[2]: choice = 1
     else: choice = 3
 
+    # go mostly straight, go faster if confident, maybe even go reverse
+    x = -0.5 - (probs[1]*0.5) + probs[3]
     # minus y is right, plus y is left
-    x = -0.5 - (probs[1]*0.5)
     y = [-0.7, -0.2, 0, 0.2, 0.7][choice]
-    control(x, y)
+    if not getenv("NODRIVE"): control(x, y)
     print(f"{x:5.2f} {y:5.2f}", probs)
 
     # draw frame and run at 5hz

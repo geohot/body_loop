@@ -15,6 +15,7 @@ We collected a dataset of carrying the body through the loop.
 "left" means it's too far left and should go right
 "right" means it's too far right and should go left
 "straight" means you are good to go straight
+"reverse" means you are against a wall and should reverse
 
 Training the model
 ------
