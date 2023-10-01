@@ -1,4 +1,5 @@
 import av
+fmt = av.video.format.VideoFormat('rgb24')
 
 # pass in msgs to decode them to frames
 codec = None
@@ -15,11 +16,10 @@ def live_decode_frames(msgs, seen_iframe=False):
       seen_iframe = True
     frames = codec.decode(av.packet.Packet(evta.data))
     if not len(frames): continue
-    imgs.append(frames[0].to_ndarray(format=av.video.format.VideoFormat('rgb24')))
+    imgs.append(frames[0].to_ndarray(format=fmt))
   return imgs, seen_iframe
 
 # get frames from dcamera files
 def frames_from_file(fn):
-  fmt = av.video.format.VideoFormat('rgb24')
   container = av.open(fn)
   for frame in container.decode(video=0): yield frame.to_ndarray(format=fmt)

@@ -59,6 +59,22 @@ def get_tinynet():
   load_state_dict(net, safe_load("tinynet.safetensors"))
   return net
 
+def get_pred():
+  # net runner
+  Tensor.no_grad = True
+  Tensor.training = False
+  foundation = get_foundation()
+  net = get_tinynet()
+  @TinyJit
+  def pred(x):
+    return net(foundation(x)).exp()[0].realize()
+
+  # warm up the net runner
+  with Timing("building 1: "): pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8))
+  with Timing("building 2: "): pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8))
+  with Timing("testing rt: "): pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8)).numpy()
+  return pred
+
 if __name__ == "__main__":
   # controlling the body
   # REQUIRED on PC: run bridge on device back to YOUR ip
@@ -79,19 +95,8 @@ if __name__ == "__main__":
     while not vipc_client.connect(False): time.sleep(0.1)
   print("vipc connected")
 
-  # net runner
-  Tensor.no_grad = True
-  Tensor.training = False
-  foundation = get_foundation()
-  net = get_tinynet()
-  @TinyJit
-  def pred(x):
-    return net(foundation(x)).exp()[0].realize()
-
-  # warm up the net runner
-  with Timing("building 1: "): pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8))
-  with Timing("building 2: "): pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8))
-  with Timing("testing rt: "): pred(Tensor.rand(1,480,640,3, dtype=dtypes.uint8)).numpy()
+  # get the net runner
+  pred = get_pred()
 
   if PC:
     seen_iframe = False

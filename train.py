@@ -9,7 +9,6 @@ from tqdm import trange
 from tinygrad.jit import TinyJit
 import numpy as np
 
-# TODO: programmatic flip adding
 train_set = [
   ("left_1_dcamera", 0),
   ("left_3_dcamera", 0),
@@ -60,7 +59,7 @@ class TinyNet:
 
 # TODO: fix dropout in the JIT
 #@TinyJit
-def train_step(x,y,z):
+def train_step(x,y):
   Tensor.training = True
   optim.lr *= 0.999
   out = net(x)
@@ -81,15 +80,15 @@ def test_step(tx,ty):
   return loss.realize(), (cat == ty).mean().realize()
 
 def get_minibatch(sets, bs=32):
-  xs, ys, zs = [], [], []
+  xs, ys = [], []
   for _ in range(bs):
     src, val = random.choice(sets)
     sel = random.randint(0, src.shape[0]-1)
     xs.append(src[sel:sel+1])
     ys.append(val)
-    zs.append(sel/src.shape[0])
-  return Tensor(np.concatenate(xs, axis=0)), Tensor(np.array(ys)), Tensor(np.array(zs, dtype=np.float32))
+  return Tensor(np.concatenate(xs, axis=0)), Tensor(np.array(ys))
 
+# add the flips to the training set with the inverse option
 def get_flips(x):
   ret = []
   for t,y in x:
@@ -106,7 +105,7 @@ if __name__ == "__main__":
   test_sets = [(safe_load(f"data/{fn}.safetensors")["x"].numpy(),y) for fn,y in test_set]
 
   # get test set
-  tx,ty,tz = get_minibatch(test_sets, 1024)
+  tx,ty = get_minibatch(test_sets, 1024)
 
   Tensor.no_grad = False
   Tensor.training = True
@@ -116,8 +115,8 @@ if __name__ == "__main__":
   acc, tacc, losses, tlosses = [], [], [], []
   for i in (t:=trange(600)):
     if i%10 == 0: test_loss, test_accuracy = test_step(tx, ty)
-    x,y,z = get_minibatch(train_sets, 64)
-    loss, accuracy = train_step(x,y,z)
+    x,y = get_minibatch(train_sets, 64)
+    loss, accuracy = train_step(x, y)
     losses.append(float(loss.numpy()))
     tlosses.append(float(test_loss.numpy()))
     acc.append(float(accuracy.numpy()))
