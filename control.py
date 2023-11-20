@@ -29,35 +29,32 @@ from train import TinyNet
 
 # this is the yolo foundation model
 def get_foundation():
-  # add tinygrad and tinygrad examples to python path
-  if PC:
-    sys.path.append(str(Path(tinygrad.__path__[0]).parent))
-    sys.path.append(str(Path(tinygrad.__path__[0]).parent / "examples"))
-  else:
-    sys.path.append("/data/openpilot/tinygrad_repo/examples")
-    sys.path.append("/data/openpilot/tinygrad_repo")
+    # add tinygrad and tinygrad examples to python path
+    tinygrad_path = Path(tinygrad.__path__[0]).parent
+    sys.path.extend([str(tinygrad_path), str(tinygrad_path / "examples")] if PC else ["/data/openpilot/tinygrad_repo/examples", "/data/openpilot/tinygrad_repo"])
 
-  from yolov8 import YOLOv8, get_variant_multiples
-  yolo_variant = "n"
-  depth, width, ratio = get_variant_multiples(yolo_variant)
-  yolo_infer = YOLOv8(w=width, r=ratio, d=depth, num_classes=80)
+    from yolov8 import YOLOv8, get_variant_multiples
+    from extra.utils import download_file
+    from tinygrad.nn.state import safe_load, load_state_dict
 
-  from extra.utils import download_file
-  from tinygrad.nn.state import safe_load, load_state_dict
-  weights_location = Path("/tmp") / f'yolov8{yolo_variant}.safetensors'
-  download_file(f'https://gitlab.com/r3sist/yolov8_weights/-/raw/master/yolov8{yolo_variant}.safetensors', weights_location)
-  state_dict = safe_load(weights_location)
-  load_state_dict(yolo_infer, state_dict)
-  def foundation(imgs:Tensor):
-    x = yolo_infer.net(imgs.permute(0,3,1,2).float() / 255)
-    x = yolo_infer.fpn(*x)
-    return x[2]
-  return foundation
+    yolo_variant = "n"
+    depth, width, ratio = get_variant_multiples(yolo_variant)
+    yolo_infer = YOLOv8(w=width, r=ratio, d=depth, num_classes=80)
+
+    weights_location = Path("/tmp") / f'yolov8{yolo_variant}.safetensors'
+    download_file(f'https://gitlab.com/r3sist/yolov8_weights/-/raw/master/yolov8{yolo_variant}.safetensors', weights_location)
+    load_state_dict(yolo_infer, safe_load(weights_location))
+
+    def foundation(imgs:Tensor):
+        x = yolo_infer.net(imgs.permute(0,3,1,2).float() / 255)
+        return yolo_infer.fpn(*x)[2]
+
+    return foundation
 
 def get_tinynet():
-  net = TinyNet()
-  load_state_dict(net, safe_load("tinynet.safetensors"))
-  return net
+    net = TinyNet()
+    load_state_dict(net, safe_load("tinynet.safetensors"))
+    return net
 
 def get_pred():
   # net runner
